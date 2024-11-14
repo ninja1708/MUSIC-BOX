@@ -11,7 +11,7 @@ A simple music bot for Discord written in Python using `discord.py` and `yt-dlp`
 
 ## Requirements
 
-- Python 3.8 or higher
+- Python 3.10
 - Required Python packages:
   - `discord.py`
   - `yt-dlp`
