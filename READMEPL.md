@@ -65,8 +65,8 @@ Aby bot działał poprawnie, musisz przyznać mu odpowiednie uprawnienia.
 
 W sekcji Bot, przewiń w dół do Privileged Gateway Intents.
 Włącz następujące uprawnienia:
-MESSAGE CONTENT INTENT – Pozwala botowi na odczytywanie treści wiadomości (ważne, jeśli bot używa komend).
-SERVER MEMBERS INTENT – Pozwala botowi zarządzać członkami serwera, jeśli jest to wymagane.
+  - MESSAGE CONTENT INTENT – Pozwala botowi na odczytywanie treści wiadomości (ważne, jeśli bot używa komend).
+  - SERVER MEMBERS INTENT – Pozwala botowi zarządzać członkami serwera, jeśli jest to wymagane.
 - Krok 6: Ustaw OAuth2 (uprawnienia bota)
 Aby zaprosić bota na swój serwer, musisz wygenerować odpowiedni link zaproszenia.
 
