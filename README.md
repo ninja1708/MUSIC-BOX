@@ -117,12 +117,12 @@ To start the bot, simply run the Python script:
 python bot.py
 ```
 ## 2. Commands:
-!play <YouTube URL>: Add a song to the queue and start playing it.
-!add <YouTube URL>: Add a song to the queue without starting playback.
-!skip: Skip the current song and play the next one in the queue.
-!stop: Stop the music and clear the queue.
-!queue: Show the current song queue.
-!777 <bet_amount>: Play a simple slot game with a bet. Win if all three symbols match.
+- !play <YouTube URL>: Add a song to the queue and start playing it.
+!- add <YouTube URL>: Add a song to the queue without starting playback.
+- !skip: Skip the current song and play the next one in the queue.
+- !stop: Stop the music and clear the queue.
+- !queue: Show the current song queue.
+- !777 <bet_amount>: Play a simple slot game with a bet. Win if all three symbols match.
 ## 3. Bot Permissions:
 Make sure the bot has permission to join and speak in the voice channel, and the necessary permissions to read and send messages.
 
