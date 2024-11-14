@@ -10,7 +10,7 @@ intents = discord.Intents.default()
 intents.message_content = True  # Pozwala botowi na odczytywanie treści wiadomości
 
 # Tworzymy instancję bota z prefiksem komend i intents
-bot = commands.Bot(command_prefix='!', intents=intents)
+bot = commands.Bot(command_prefix='!', intents=intents) # =========== USTAW SWÓJ PREFIX 
 
 # Globalna kolejka piosenek
 song_queue = []
@@ -96,7 +96,7 @@ async def on_audio_end(ctx, download_path):
             await voice_client.disconnect()
 
 # Komenda do dodania piosenki do kolejki i odtwarzania
-@bot.command(name='play')
+@bot.command(name='play')  #=========================================================================== Zamień nazwę ustawienia komendy 
 async def play(ctx, url):
     global is_playing
 
@@ -115,7 +115,7 @@ async def play(ctx, url):
         await play_audio(ctx)
 
 # Komenda do dodawania piosenki do kolejki bez odtwarzania
-@bot.command(name='add')
+@bot.command(name='add')   #=========================================================================== Zamień nazwę ustawienia komendy 
 async def add(ctx, url):
     download_path, title = download_audio(url)
     if download_path is None:
@@ -126,7 +126,7 @@ async def add(ctx, url):
     await ctx.send(f'Piosenka "{title}" została dodana do kolejki.')
 
 # Komenda do pominięcia bieżącej piosenki
-@bot.command(name='skip')
+@bot.command(name='skip')   #=========================================================================== Zamień nazwę ustawienia komendy 
 async def skip(ctx):
     voice_client = discord.utils.get(bot.voice_clients, guild=ctx.guild)
     if voice_client and voice_client.is_playing():
@@ -134,7 +134,7 @@ async def skip(ctx):
         voice_client.stop()  # Przejście do następnej piosenki uruchomi się w on_audio_end
 
 # Komenda do zatrzymywania muzyki i wyczyszczenia kolejki
-@bot.command(name='stop')
+@bot.command(name='stop')   #=========================================================================== Zamień nazwę ustawienia komendy 
 async def stop(ctx):
     global song_queue, is_playing
     
@@ -159,7 +159,7 @@ async def stop(ctx):
     is_playing = False
 
 # Komenda do pokazania kolejki
-@bot.command(name='queue')
+@bot.command(name='queue')   #=========================================================================== Zamień nazwę ustawienia komendy 
 async def queue(ctx):
     if not song_queue:
         await ctx.send("Kolejka jest pusta!")
@@ -193,7 +193,7 @@ def play_777(bet_amount):
         return result, False
 
 # Komenda do rozpoczęcia gry 777
-@bot.command(name='777')
+@bot.command(name='777')   #=========================================================================== Zamień nazwę ustawienia komendy 
 async def play(ctx, bet: int):
     # Sprawdzamy, czy użytkownik podał odpowiednią kwotę
     if bet <= 0:
