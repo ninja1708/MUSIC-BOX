@@ -4,17 +4,61 @@ import yt_dlp as youtube_dl
 import asyncio
 import os
 import random
+import cgi
+
 restart = False
 # Tworzymy obiekt intents z wymaganymi uprawnieniami
 intents = discord.Intents.default()
 intents.message_content = True  # Pozwala botowi na odczytywanie treści wiadomości
 
 # Tworzymy instancję bota z prefiksem komend i intents
-bot = commands.Bot(command_prefix='!', intents=intents) # =========== USTAW SWÓJ PREFIX 
+bot = commands.Bot(command_prefix='!', intents=intents)  # =========== USTAW SWÓJ PREFIX
 
 # Globalna kolejka piosenek
 song_queue = []
 is_playing = False
+
+
+@bot.command(name="clear")
+async def clear_queue(ctx):
+    """Czyści kolejkę utworów."""
+    global song_queue
+    if song_queue:
+        song_queue.clear()
+        await ctx.send("Kolejka utworów została wyczyszczona.")
+    else:
+        await ctx.send("Kolejka jest już pusta.")
+    download_folder = "downloads"
+    if os.path.exists(download_folder) and os.path.isdir(download_folder):
+        # Usuwanie wszystkich plików w folderze download
+        for filename in os.listdir(download_folder):
+            file_path = os.path.join(download_folder, filename)
+            try:
+                os.remove(file_path)
+            except Exception as e:
+                await ctx.send(f"Nie udało się usunąć pliku: {filename}. Błąd: {e}")
+        await ctx.send("Folder download został opróżniony.")
+    else:
+        await ctx.send("Folder download nie istnieje lub jest już pusty.")
+
+@bot.command(name="join")
+async def join(ctx):
+    """Dołącza do kanału głosowego użytkownika, który wywołał komendę."""
+    if ctx.author.voice:
+        channel = ctx.author.voice.channel
+        await channel.connect()
+        await ctx.send(f"Dołączyłem do kanału: {channel.name}")
+    else:
+        await ctx.send("Nie jesteś na żadnym kanale głosowym!")
+
+@bot.command(name="leave")
+async def leave(ctx):
+    """Opuszcza kanał głosowy, jeśli jest na jakimś połączony."""
+    if ctx.voice_client:  # Sprawdza, czy bot jest na kanale głosowym
+        await ctx.voice_client.disconnect()
+        await ctx.send("Opuszczam kanał.")
+    else:
+        await ctx.send("Nie jestem na żadnym kanale głosowym.")
 
 # Funkcja do pobierania audio z YouTube
 def download_audio(url):
@@ -34,6 +78,7 @@ def download_audio(url):
     except Exception as e:
         print(f"Error downloading audio: {e}")
         return None, None
+
 
 # Funkcja do odtwarzania audio w kanale głosowym
 async def play_audio(ctx):
@@ -78,6 +123,7 @@ async def play_audio(ctx):
         after=lambda e: asyncio.run_coroutine_threadsafe(on_audio_end(ctx, download_path), bot.loop)
     )
 
+
 # Funkcja do obsługi końca piosenki i przejścia do następnej w kolejce
 async def on_audio_end(ctx, download_path):
     global is_playing
@@ -85,7 +131,7 @@ async def on_audio_end(ctx, download_path):
     if os.path.exists(download_path):
         os.remove(download_path)
         print(f"Plik {download_path} został usunięty.")
-    
+
     if song_queue:
         await play_audio(ctx)  # Odtwarzamy następną piosenkę
     else:
@@ -95,8 +141,10 @@ async def on_audio_end(ctx, download_path):
         if voice_client:
             await voice_client.disconnect()
 
+
 # Komenda do dodania piosenki do kolejki i odtwarzania
-@bot.command(name='play')  #=========================================================================== Zamień nazwę ustawienia komendy 
+@bot.command(
+    name='play')  # =========================================================================== Zamień nazwę ustawienia komendy
 async def play(ctx, url):
     global is_playing
 
@@ -114,8 +162,10 @@ async def play(ctx, url):
     if not is_playing:
         await play_audio(ctx)
 
+
 # Komenda do dodawania piosenki do kolejki bez odtwarzania
-@bot.command(name='add')   #=========================================================================== Zamień nazwę ustawienia komendy 
+@bot.command(
+    name='add')  # =========================================================================== Zamień nazwę ustawienia komendy
 async def add(ctx, url):
     download_path, title = download_audio(url)
     if download_path is None:
@@ -125,24 +175,28 @@ async def add(ctx, url):
     song_queue.append((url, title, download_path))
     await ctx.send(f'Piosenka "{title}" została dodana do kolejki.')
 
+
 # Komenda do pominięcia bieżącej piosenki
-@bot.command(name='skip')   #=========================================================================== Zamień nazwę ustawienia komendy 
+@bot.command(
+    name='skip')  # =========================================================================== Zamień nazwę ustawienia komendy
 async def skip(ctx):
     voice_client = discord.utils.get(bot.voice_clients, guild=ctx.guild)
     if voice_client and voice_client.is_playing():
         await ctx.send("Pomijam bieżącą piosenkę...")
         voice_client.stop()  # Przejście do następnej piosenki uruchomi się w on_audio_end
 
+
 # Komenda do zatrzymywania muzyki i wyczyszczenia kolejki
-@bot.command(name='stop')   #=========================================================================== Zamień nazwę ustawienia komendy 
+@bot.command(
+    name='stop')  # =========================================================================== Zamień nazwę ustawienia komendy
 async def stop(ctx):
     global song_queue, is_playing
-    
+
     # Pobieramy voice_client i zatrzymujemy odtwarzanie
     voice_client = discord.utils.get(bot.voice_clients, guild=ctx.guild)
     if voice_client and voice_client.is_playing():
         voice_client.stop()  # Zatrzymanie aktualnie odtwarzanej piosenki
-    
+
     # Odłączenie bota od kanału głosowego
     if voice_client:
         await voice_client.disconnect()
@@ -153,13 +207,15 @@ async def stop(ctx):
         if os.path.exists(file_path):
             os.remove(file_path)
             print(f"Plik {file_path} został usunięty.")
-    
+
     # Wyczyszczenie kolejki i zresetowanie flagi odtwarzania
     song_queue.clear()
     is_playing = False
 
+
 # Komenda do pokazania kolejki
-@bot.command(name='queue')   #=========================================================================== Zamień nazwę ustawienia komendy 
+@bot.command(
+    name='queue')  # =========================================================================== Zamień nazwę ustawienia komendy
 async def queue(ctx):
     if not song_queue:
         await ctx.send("Kolejka jest pusta!")
@@ -168,7 +224,7 @@ async def queue(ctx):
     queue_str = "Aktualna kolejka utworów:\n"
     for idx, (_, title, _) in enumerate(song_queue, 1):
         queue_str += f"{idx}. {title}\n"
-    
+
     await ctx.send(queue_str)
 
 
@@ -176,6 +232,8 @@ async def queue(ctx):
 @bot.event
 async def on_ready():
     print(f'Bot {bot.user} jest gotowy do działania!')
+
+
 # Funkcja do gry 777 (losowy wynik)
 def play_777(bet_amount):
     # Możliwe symbole w grze 777
@@ -192,25 +250,27 @@ def play_777(bet_amount):
         # Przegrana (brak takich samych symboli)
         return result, False
 
+
 # Komenda do rozpoczęcia gry 777
-@bot.command(name='777')   #=========================================================================== Zamień nazwę ustawienia komendy 
+@bot.command(
+    name='777')  # =========================================================================== Zamień nazwę ustawienia komendy
 async def play(ctx, bet: int):
     # Sprawdzamy, czy użytkownik podał odpowiednią kwotę
     if bet <= 0:
         await ctx.send("Podaj poprawną kwotę zakładu (większą niż 0).")
         return
-    
+
     # Wywołanie funkcji do gry
     result, won = play_777(bet)
 
     # Wynik gry (co zostało wylosowane)
     result_string = " | ".join(result)
-    
+
     # Odpowiedź do użytkownika
     if won:
         await ctx.send(f"Wynik: {result_string} 🎉🎉 Wygrałeś {bet * 2} monet!")
     else:
         await ctx.send(f"Wynik: {result_string} 😞 Niestety, przegrałeś {bet} monet.")
-        
 
-bot.run('Your_TOKEN')
+
+bot.run('MTA5Nzk5NTcwMTc4NDQzMjY1MA.GOj4oh.SvWN0yUBfdTDrE9ErgR2WAIMuLNpjioWh-msEQ')
