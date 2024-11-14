@@ -101,6 +101,9 @@ python bot.py
 - !skip: Pomijaj bieżącą piosenkę i przejdź do następnej w kolejce.
 - !stop: Zatrzymaj muzykę i wyczyść kolejkę.
 - !queue: Pokaż aktualną kolejkę piosenek.
+- !leave: bot wychodzi z kanału
+- !join: bot dołącza do kanału
+- !clear: czyści kolejkę i folder downloads (przydatne gdy bot jest na jakimś serwerze)
 - !777 <kwota_zakładu>: Graj w prostą grę losową z zakładem. Wygraj, jeśli wszystkie trzy symbole będą takie same.
 ## 3. Uprawnienia bota:
 Upewnij się, że bot ma uprawnienia do dołączenia i mówienia na kanale głosowym oraz niezbędne uprawnienia do odczytu i wysyłania wiadomości.
