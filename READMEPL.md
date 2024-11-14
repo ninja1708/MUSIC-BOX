@@ -11,7 +11,7 @@ Prosty bot muzyczny dla Discorda napisany w Pythonie, wykorzystujący `discord.p
 
 ## Wymagania
 
-- Python 3.8 lub wyższy
+- Python 3.10
 - Wymagane biblioteki Python:
   - `discord.py`
   - `yt-dlp`
