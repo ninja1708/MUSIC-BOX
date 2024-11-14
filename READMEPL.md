@@ -87,7 +87,7 @@ Skopiuj wygenerowany URL i otwórz go w przeglądarce, aby zaprosić bota na sw�
 ## Krok 7: Zabezpiecz swojego bota
 Jeśli bot będzie publiczny, upewnij się, że używasz zmiennych środowiskowych lub plików konfiguracyjnych do przechowywania tokenu bota, aby zapobiec jego ujawnieniu.
 Użyj dodatkowych mechanizmów ochrony, takich jak Two-Factor Authentication (2FA), aby zabezpieczyć konto swojego bota.
-##Krok 8: Uruchom swojego bota
+## Krok 8: Uruchom swojego bota
 Po wygenerowaniu tokenu, użyj go w kodzie swojego bota (np. bot.run('YOUR_BOT_TOKEN')).
 Uruchom bota na swoim serwerze, aby sprawdzić, czy działa poprawnie.
 Użycie
