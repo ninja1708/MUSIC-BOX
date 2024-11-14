@@ -118,7 +118,7 @@ python bot.py
 ```
 ## 2. Commands:
 - !play <YouTube URL>: Add a song to the queue and start playing it.
-!- add <YouTube URL>: Add a song to the queue without starting playback.
+- !add <YouTube URL>: Add a song to the queue without starting playback.
 - !skip: Skip the current song and play the next one in the queue.
 - !stop: Stop the music and clear the queue.
 - !queue: Show the current song queue.
