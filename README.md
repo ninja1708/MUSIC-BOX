@@ -38,6 +38,11 @@ source venv/bin/activate  # On Windows use `venv\Scripts\activate`
 pip install -r requirements.txt
 ```
 ### 4. Download and install FFmpeg:
+```bash
+sudo apt update
+sudo apt upgrade
+sudo apt install ffmpeg
+```
 You can download FFmpeg from here. Make sure to add FFmpeg to your system's PATH variable.
 
 ### 5. Set up your Discord bot token:
