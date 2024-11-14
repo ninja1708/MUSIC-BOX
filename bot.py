@@ -6,7 +6,28 @@ import os
 import random
 import cgi
 
-restart = False
+import requests
+
+# Funkcja do pobierania tekstów piosenek
+@bot.command(name="lyrics")
+async def lyrics(ctx, *, song_name):
+    await ctx.send(f"🔍 Szukam tekstu do piosenki: **{song_name}**...")
+    try:
+        response = requests.get(f"https://api.lyrics.ovh/v1/{song_name}")
+        data = response.json()
+
+        if "lyrics" in data:
+            lyrics_text = data["lyrics"]
+            # Jeśli tekst jest zbyt długi na jedną wiadomość, dzielimy go na fragmenty
+            chunks = [lyrics_text[i:i+2000] for i in range(0, len(lyrics_text), 2000)]
+            for chunk in chunks:
+                await ctx.send(chunk)
+        else:
+            await ctx.send("❌ Nie znaleziono tekstu do tej piosenki.")
+
+    except Exception as e:
+        await ctx.send("❌ Wystąpił błąd podczas pobierania tekstu piosenki.")
+
 # Tworzymy obiekt intents z wymaganymi uprawnieniami
 intents = discord.Intents.default()
 intents.message_content = True  # Pozwala botowi na odczytywanie treści wiadomości
@@ -84,6 +105,7 @@ def download_audio(url):
 async def play_audio(ctx):
     global is_playing
     if not song_queue:
+        await ctx.send("___________________")
         await ctx.send("Kolejka jest pusta!")
         is_playing = False
         return
@@ -101,7 +123,7 @@ async def play_audio(ctx):
     if not download_path:
         await ctx.send("Nie udało się pobrać pliku audio.")
         return
-
+    await ctx.send("___________________________")
     # Wyświetlanie aktualnie odtwarzanej piosenki
     await ctx.send(f'Odtwarzam teraz: "{title}"')
 
@@ -156,6 +178,7 @@ async def play(ctx, url):
 
     # Dodajemy URL, tytuł i ścieżkę pobrania do kolejki
     song_queue.append((url, title, download_path))
+    await ctx.send("______________________________________________")
     await ctx.send(f'Piosenka "{title}" została dodana do kolejki.')
 
     # Jeśli to pierwsza piosenka, zaczynamy odtwarzanie
@@ -273,4 +296,4 @@ async def play(ctx, bet: int):
         await ctx.send(f"Wynik: {result_string} 😞 Niestety, przegrałeś {bet} monet.")
 
 
-bot.run('MTA5Nzk5NTcwMTc4NDQzMjY1MA.GOj4oh.SvWN0yUBfdTDrE9ErgR2WAIMuLNpjioWh-msEQ')
+bot.run('YOUR_TOKEN')
