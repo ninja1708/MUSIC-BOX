@@ -122,6 +122,9 @@ python bot.py
 - !skip: Skip the current song and play the next one in the queue.
 - !stop: Stop the music and clear the queue.
 - !queue: Show the current song queue.
+- !leave: bot leave a channel
+- !join: bot join a channel
+- !clear: clear queue and folder downloads
 - !777 <bet_amount>: Play a simple slot game with a bet. Win if all three symbols match.
 ## 3. Bot Permissions:
 Make sure the bot has permission to join and speak in the voice channel, and the necessary permissions to read and send messages.
