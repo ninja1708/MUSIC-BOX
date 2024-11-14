@@ -63,7 +63,7 @@ Token jest kluczowy do uruchomienia bota w twoim kodzie — przechowuj go w bezp
 - Krok 5: Ustaw uprawnienia bota
 Aby bot działał poprawnie, musisz przyznać mu odpowiednie uprawnienia.
 
-W sekcji Bot, przewiń w dół do Privileged Gateway Intents.
+# W sekcji Bot, przewiń w dół do Privileged Gateway Intents.
 Włącz następujące uprawnienia:
   - MESSAGE CONTENT INTENT – Pozwala botowi na odczytywanie treści wiadomości (ważne, jeśli bot używa komend).
   - SERVER MEMBERS INTENT – Pozwala botowi zarządzać członkami serwera, jeśli jest to wymagane.
@@ -72,7 +72,7 @@ Aby zaprosić bota na swój serwer, musisz wygenerować odpowiedni link zaprosze
 
 Przejdź do sekcji OAuth2 w menu po lewej stronie.
 
-## W OAuth2 URL Generator wybierz następujące zakresy:
+# W OAuth2 URL Generator wybierz następujące zakresy:
 
 bot w sekcji SCOPES.
 Wybierz wymagane uprawnienia w sekcji BOT PERMISSIONS.
