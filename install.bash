@@ -20,6 +20,7 @@ rm get-pip.py
 
 echo "Instalacja biblioteki numpy..."
 python3.10 -m pip install discord.py yt_dlp
-
+pip uninstall pynacl
+pip install -U pynacl
 echo "Instalowanie ffmepg"
 apt install ffmpeg
