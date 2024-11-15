@@ -17,10 +17,11 @@ sudo apt install python3 python3-pip
 
 echo "Usuwanie skryptu instalacyjnego Pip..."
 rm get-pip.py
+echo "Instalowanie ffmepg"
+apt install ffmpeg
 
-echo "Instalacja biblioteki numpy..."
+echo "Instalacja bibliotek"
 python3.10 -m pip install discord.py yt_dlp
 pip uninstall pynacl
 pip install -U pynacl
-echo "Instalowanie ffmepg"
-apt install ffmpeg
+
