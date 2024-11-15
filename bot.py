@@ -5,8 +5,14 @@ import asyncio
 import os
 import random
 import cgi
-
 import requests
+
+# Tworzymy obiekt intents z wymaganymi uprawnieniami
+intents = discord.Intents.default()
+intents.message_content = True  # Pozwala botowi na odczytywanie treści wiadomości
+
+# Tworzymy instancję bota z prefiksem komend i intents
+bot = commands.Bot(command_prefix='!', intents=intents)  # =========== USTAW SWÓJ PREFIX
 
 # Funkcja do pobierania tekstów piosenek
 @bot.command(name="lyrics")
@@ -27,13 +33,6 @@ async def lyrics(ctx, *, song_name):
 
     except Exception as e:
         await ctx.send("❌ Wystąpił błąd podczas pobierania tekstu piosenki.")
-
-# Tworzymy obiekt intents z wymaganymi uprawnieniami
-intents = discord.Intents.default()
-intents.message_content = True  # Pozwala botowi na odczytywanie treści wiadomości
-
-# Tworzymy instancję bota z prefiksem komend i intents
-bot = commands.Bot(command_prefix='!', intents=intents)  # =========== USTAW SWÓJ PREFIX
 
 # Globalna kolejka piosenek
 song_queue = []
