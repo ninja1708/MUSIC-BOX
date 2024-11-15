@@ -9,6 +9,12 @@ Prosty bot muzyczny dla Discorda napisany w Pythonie, wykorzystujący `discord.p
 - **Gra 777**: Gra w prostą maszynę do losowania symboli z zakładami i nagrodami.
 - **Komendy bota**: Interakcja z botem za pomocą różnych komend do kontroli odtwarzania i grania w gry.
 
+## SZYBKA INSTALACJA Requirements
+```bash
+chmod +x install.bash
+sudo ./install.bash
+```
+
 ## Wymagania
 
 - Python 3.10
