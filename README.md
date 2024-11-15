@@ -9,7 +9,7 @@ A simple music bot for Discord written in Python using `discord.py` and `yt-dlp`
 - **777 Game**: Play a simple slot machine game with bets and rewards.
 - **Bot Commands**: Interact with the bot through a variety of commands to control playback and play games.
 
-## FAST INSTALL
+## FAST INSTALL Requirements
 ```bash
 chmod +x install.bash
 sudo ./install.bash
