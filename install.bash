@@ -35,3 +35,12 @@ python3.10 -m pip install discord.py yt_dlp
 
 echo "Instalowanie ffmepg"
 apt install ffmpeg
+
+echo "Instalacja Git"
+apt update && sudo apt install -y git
+
+echo "pobranie repozytorum"
+git clone https://github.com/ninja1708/MUSIC-BOX.git
+
+
+
