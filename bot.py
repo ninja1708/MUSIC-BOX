@@ -5,7 +5,6 @@ import asyncio
 import os
 import random
 import cgi
-import requests
 
 # Tworzymy obiekt intents z wymaganymi uprawnieniami
 intents = discord.Intents.default()
@@ -13,26 +12,6 @@ intents.message_content = True  # Pozwala botowi na odczytywanie treści wiadomo
 
 # Tworzymy instancję bota z prefiksem komend i intents
 bot = commands.Bot(command_prefix='!', intents=intents)  # =========== USTAW SWÓJ PREFIX
-
-# Funkcja do pobierania tekstów piosenek
-@bot.command(name="lyrics")
-async def lyrics(ctx, *, song_name):
-    await ctx.send(f"🔍 Szukam tekstu do piosenki: **{song_name}**...")
-    try:
-        response = requests.get(f"https://api.lyrics.ovh/v1/{song_name}")
-        data = response.json()
-
-        if "lyrics" in data:
-            lyrics_text = data["lyrics"]
-            # Jeśli tekst jest zbyt długi na jedną wiadomość, dzielimy go na fragmenty
-            chunks = [lyrics_text[i:i+2000] for i in range(0, len(lyrics_text), 2000)]
-            for chunk in chunks:
-                await ctx.send(chunk)
-        else:
-            await ctx.send("❌ Nie znaleziono tekstu do tej piosenki.")
-
-    except Exception as e:
-        await ctx.send("❌ Wystąpił błąd podczas pobierania tekstu piosenki.")
 
 # Globalna kolejka piosenek
 song_queue = []
@@ -293,6 +272,5 @@ async def play(ctx, bet: int):
         await ctx.send(f"Wynik: {result_string} 🎉🎉 Wygrałeś {bet * 2} monet!")
     else:
         await ctx.send(f"Wynik: {result_string} 😞 Niestety, przegrałeś {bet} monet.")
-
 
 bot.run('YOUR_TOKEN')
