@@ -4,7 +4,6 @@ import yt_dlp as youtube_dl
 import asyncio
 import os
 import random
-import cgi
 
 # Tworzymy obiekt intents z wymaganymi uprawnieniami
 intents = discord.Intents.default()
