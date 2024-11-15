@@ -16,13 +16,12 @@ apt update
 echo "Pobieranie skryptu instalacyjnego Pip..."
 apt install -y python3.10 python3.10-venv python3.10-dev python3-pip
 
-echo "Usuwanie skryptu instalacyjnego Pip..."
-rm get-pip.py
 echo "Instalowanie ffmepg"
 apt install ffmpeg
 
 echo "Instalacja bibliotek"
-python3.10 -m pip install discord.py yt_dlp
+pip install discord discord.py yt_dlp
 pip uninstall pynacl
 pip install -U pynacl
+
 
