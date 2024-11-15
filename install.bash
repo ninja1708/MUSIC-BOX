@@ -10,10 +10,11 @@ echo "Aktualizacja listy pakietów..."
 apt update
 
 echo "Instalacja Pythona 3.10..."
-apt install python3.10
-
+apt install -y software-properties-common
+add-apt-repository -y ppa:deadsnakes/ppa
+apt update
 echo "Pobieranie skryptu instalacyjnego Pip..."
-sudo apt install python3 python3-pip
+apt install -y python3.10 python3.10-venv python3.10-dev python3-pip
 
 echo "Usuwanie skryptu instalacyjnego Pip..."
 rm get-pip.py
