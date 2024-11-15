@@ -99,7 +99,7 @@ Uruchom bota na swoim serwerze, aby sprawdzić, czy działa poprawnie.
 Użycie
 Uruchom bota: Aby uruchomić bota, wystarczy uruchomić skrypt Pythona:
 ```bash
-python bot.py
+python3.10 bot.py
 ```
 ## 2. Komendy:
 - !play <YouTube URL>: Dodaj piosenkę do kolejki i rozpocznij odtwarzanie.
