@@ -9,23 +9,11 @@ fi
 echo "Aktualizacja listy pakietów..."
 apt update
 
-echo "Instalacja zależności wymaganych do budowy Pythona 3.10..."
-apt install -y software-properties-common wget build-essential \
-    libssl-dev zlib1g-dev libncurses5-dev libnss3-dev libsqlite3-dev \
-    libreadline-dev libffi-dev curl libbz2-dev
-
-echo "Dodawanie repozytorium PPA dla Pythona..."
-add-apt-repository -y ppa:deadsnakes/ppa
-apt update
-
 echo "Instalacja Pythona 3.10..."
-apt install -y python3.10 python3.10-distutils
+apt install python3.10
 
 echo "Pobieranie skryptu instalacyjnego Pip..."
-curl -sS https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-
-echo "Instalacja Pip dla Pythona 3.10..."
-python3.10 get-pip.py
+sudo apt install python3 python3-pip
 
 echo "Usuwanie skryptu instalacyjnego Pip..."
 rm get-pip.py
@@ -35,9 +23,3 @@ python3.10 -m pip install discord.py yt_dlp
 
 echo "Instalowanie ffmepg"
 apt install ffmpeg
-
-echo "Instalacja upadate"
-apt update
-
-
-
