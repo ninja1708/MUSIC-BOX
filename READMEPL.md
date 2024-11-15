@@ -73,7 +73,7 @@ Aby bot działał poprawnie, musisz przyznać mu odpowiednie uprawnienia.
 Włącz następujące uprawnienia:
   - MESSAGE CONTENT INTENT – Pozwala botowi na odczytywanie treści wiadomości (ważne, jeśli bot używa komend).
   - SERVER MEMBERS INTENT – Pozwala botowi zarządzać członkami serwera, jeśli jest to wymagane.
-- Krok 6: Ustaw OAuth2 (uprawnienia bota)
+## Krok 6: Ustaw OAuth2 (uprawnienia bota)
 Aby zaprosić bota na swój serwer, musisz wygenerować odpowiedni link zaproszenia.
 
 Przejdź do sekcji OAuth2 w menu po lewej stronie.
