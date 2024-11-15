@@ -119,7 +119,7 @@ To invite the bot to your server, you need to generate the appropriate invite li
 To start the bot, simply run the Python script:
 
 ```bash
-python bot.py
+python3.10 bot.py
 ```
 ## 2. Commands:
 - !play <YouTube URL>: Add a song to the queue and start playing it.
