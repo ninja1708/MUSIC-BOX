@@ -7,6 +7,7 @@ A simple music bot for Discord written in Python using `discord.py` and `yt-dlp`
 - **Music Playback**: Play audio from YouTube links directly in a voice channel.
 - **Queue Management**: Add songs to a queue and skip or stop songs.
 - **777 Game**: Play a simple slot machine game with bets and rewards.
+- **PLAYLISTS**: ADD PLAYLIST
 - **Bot Commands**: Interact with the bot through a variety of commands to control playback and play games.
 
 ## FAST INSTALL Requirements
@@ -132,7 +133,7 @@ python3.10 bot.py
 - !clear: clear queue and folder downloads
 - !777 <bet_amount>: Play a simple slot game with a bet. Win if all three symbols match.
 - !playlist
-- !addplaylist <"NAME"> <URL>
+- !addplaylist <"NAME"> <YouTube URL>
 ## 3. Bot Permissions:
 Make sure the bot has permission to join and speak in the voice channel, and the necessary permissions to read and send messages.
 
