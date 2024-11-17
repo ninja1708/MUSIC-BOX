@@ -134,6 +134,7 @@ python3.10 bot.py
 - !777 <bet_amount>: Play a simple slot game with a bet. Win if all three symbols match.
 - !playlist
 - !addplaylist <"NAME"> <YouTube URL>
+- !HELP: informations
 ## 3. Bot Permissions:
 Make sure the bot has permission to join and speak in the voice channel, and the necessary permissions to read and send messages.
 
