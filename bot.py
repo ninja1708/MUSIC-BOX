@@ -33,7 +33,18 @@ def download_audio(url, folder="downloads"):
     except Exception as e:
         print(f"Error downloading audio: {e}")
         return None, None
+        
+@bot.command(name='queue')  # =========================================================================== Zamień nazwę ustawienia komendy
+async def queue(ctx):
+    if not song_queue:
+        await ctx.send("Kolejka jest pusta!")
+        return
 
+    queue_str = "Aktualna kolejka utworów:\n"
+    for idx, (_, title, _) in enumerate(song_queue, 1):
+        queue_str += f"{idx}. {title}\n"
+
+    await ctx.send(queue_str)
 
 # Funkcja do usuwania pliku po odtworzeniu
 def delete_file(path):
