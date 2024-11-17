@@ -3,42 +3,186 @@ from discord.ext import commands
 import yt_dlp as youtube_dl
 import asyncio
 import os
+import json
 import random
 
-# Tworzymy obiekt intents z wymaganymi uprawnieniami
 intents = discord.Intents.default()
-intents.message_content = True  # Pozwala botowi na odczytywanie treści wiadomości
+intents.message_content = True
 
-# Tworzymy instancję bota z prefiksem komend i intents
-bot = commands.Bot(command_prefix='!', intents=intents)  # =========== USTAW SWÓJ PREFIX
+bot = commands.Bot(command_prefix='!', intents=intents)
 
-# Globalna kolejka piosenek
 song_queue = []
 is_playing = False
 
 
-@bot.command(name="clear")
-async def clear_queue(ctx):
-    """Czyści kolejkę utworów."""
-    global song_queue
-    if song_queue:
-        song_queue.clear()
-        await ctx.send("Kolejka utworów została wyczyszczona.")
-    else:
-        await ctx.send("Kolejka jest już pusta.")
-    download_folder = "downloads"
-    if os.path.exists(download_folder) and os.path.isdir(download_folder):
-        # Usuwanie wszystkich plików w folderze download
-        for filename in os.listdir(download_folder):
-            file_path = os.path.join(download_folder, filename)
-            try:
-                os.remove(file_path)
-            except Exception as e:
-                await ctx.send(f"Nie udało się usunąć pliku: {filename}. Błąd: {e}")
-        await ctx.send("Folder download został opróżniony.")
-    else:
-        await ctx.send("Folder download nie istnieje lub jest już pusty.")
+# Funkcja do pobierania audio z YouTube
+def download_audio(url, folder="downloads"):
+    try:
+        ydl_opts = {
+            'format': 'bestaudio/best',
+            'outtmpl': f'{folder}/%(id)s.%(ext)s',
+            'quiet': False,
+        }
 
+        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+            info_dict = ydl.extract_info(url, download=True)
+            filename = ydl.prepare_filename(info_dict)
+            audio_filename = f"{folder}/{info_dict['id']}.{info_dict['ext']}"
+            title = info_dict.get('title', 'Unknown')
+            return audio_filename, title
+    except Exception as e:
+        print(f"Error downloading audio: {e}")
+        return None, None
+
+
+# Funkcja do usuwania pliku po odtworzeniu
+def delete_file(path):
+    if os.path.exists(path):
+        os.remove(path)
+
+
+# Funkcja do odtwarzania audio
+async def play_audio(ctx):
+    global is_playing
+
+    if not song_queue:
+        await ctx.send("Kolejka jest pusta!")
+        is_playing = False
+        return
+
+    is_playing = True
+    url, title, path = song_queue.pop(0)
+
+    voice_client = discord.utils.get(bot.voice_clients, guild=ctx.guild)
+    if voice_client is None:
+        voice_channel = ctx.author.voice.channel
+        voice_client = await voice_channel.connect()
+
+    if not os.path.exists(path):
+        path, title = download_audio(url)
+
+    if path:
+        voice_client.play(
+            discord.FFmpegPCMAudio(path),
+            after=lambda e: asyncio.run_coroutine_threadsafe(on_audio_end(ctx, path), bot.loop)
+        )
+        await ctx.send(f"Odtwarzam teraz: {title}")
+    else:
+        await ctx.send("Nie udało się odtworzyć utworu.")
+
+
+async def on_audio_end(ctx, path):
+    global is_playing
+    if path.startswith("downloads"):
+        delete_file(path)
+
+    if song_queue:
+        await play_audio(ctx)
+    else:
+        is_playing = False
+
+
+@bot.command(name="play")
+async def play(ctx, url):
+    global is_playing
+
+    download_path, title = download_audio(url)
+    if download_path:
+        song_queue.append((url, title, download_path))
+        await ctx.send(f"Piosenka '{title}' została dodana do kolejki.")
+        if not is_playing:
+            await play_audio(ctx)
+    else:
+        await ctx.send("Nie udało się pobrać audio.")
+
+
+@bot.command(name="skip")
+async def skip(ctx):
+    voice_client = discord.utils.get(bot.voice_clients, guild=ctx.guild)
+    if voice_client and voice_client.is_playing():
+        voice_client.stop()
+        await ctx.send("Pomijam utwór...")
+    else:
+        await ctx.send("Nie odtwarzam żadnej muzyki.")
+
+
+@bot.command(name="stop")
+async def stop(ctx):
+    global song_queue, is_playing
+    song_queue.clear()
+    is_playing = False
+
+    voice_client = discord.utils.get(bot.voice_clients, guild=ctx.guild)
+    if voice_client and voice_client.is_playing():
+        voice_client.stop()
+        await voice_client.disconnect()
+        await ctx.send("Zatrzymano odtwarzanie.")
+
+
+# Obsługa playlist
+@bot.command(name="addplaylist")
+async def addplaylist(ctx, playlist_name: str, url: str):
+    folder_path = f"playlists/{playlist_name}"
+    os.makedirs(folder_path, exist_ok=True)
+
+    download_path, title = download_audio(url, folder=folder_path)
+    if not download_path:
+        await ctx.send("Nie udało się pobrać audio.")
+        return
+
+    metadata_path = os.path.join(folder_path, "metadata.json")
+    if not os.path.exists(metadata_path):
+        with open(metadata_path, "w") as file:
+            json.dump({}, file)
+
+    with open(metadata_path, "r") as file:
+        metadata = json.load(file)
+
+    metadata[os.path.basename(download_path)] = title
+
+    with open(metadata_path, "w") as file:
+        json.dump(metadata, file)
+
+    await ctx.send(f"Piosenka '{title}' została dodana do playlisty '{playlist_name}'.")
+
+
+@bot.command(name="playlist")
+async def playlist(ctx, playlist_name=None):
+    if playlist_name is None:
+        playlists = [f for f in os.listdir("playlists") if os.path.isdir(os.path.join("playlists", f))]
+        if playlists:
+            await ctx.send("Dostępne playlisty:\n" + "\n".join(playlists))
+        else:
+            await ctx.send("Brak dostępnych playlist.")
+        return
+
+    folder_path = f"playlists/{playlist_name}"
+    metadata_path = os.path.join(folder_path, "metadata.json")
+
+    if not os.path.exists(folder_path) or not os.path.exists(metadata_path):
+        await ctx.send(f"Playlista '{playlist_name}' nie istnieje.")
+        return
+
+    with open(metadata_path, "r") as file:
+        metadata = json.load(file)
+
+    if not metadata:
+        await ctx.send(f"Playlista '{playlist_name}' jest pusta.")
+        return
+
+    global song_queue
+    for filename, title in metadata.items():
+        song_queue.append((None, title, os.path.join(folder_path, filename)))
+
+    await ctx.send(f"Załadowano playlistę '{playlist_name}' z {len(metadata)} utworami.")
+    if not is_playing:
+        await play_audio(ctx)
+
+
+@bot.event
+async def on_ready():
+    print(f"Bot {bot.user} jest gotowy do działania!")
+    
 @bot.command(name="join")
 async def join(ctx):
     """Dołącza do kanału głosowego użytkownika, który wywołał komendę."""
@@ -58,182 +202,6 @@ async def leave(ctx):
     else:
         await ctx.send("Nie jestem na żadnym kanale głosowym.")
 
-# Funkcja do pobierania audio z YouTube
-def download_audio(url):
-    try:
-        ydl_opts = {
-            'format': 'bestaudio/best',  # Pobierz najlepszy dostępny format audio
-            'outtmpl': 'downloads/%(id)s.%(ext)s',  # Określenie ścieżki zapisu
-            'quiet': False,  # Aby wyświetlić proces pobierania
-        }
-
-        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-            info_dict = ydl.extract_info(url, download=True)
-            filename = ydl.prepare_filename(info_dict)
-            audio_filename = f"downloads/{info_dict['id']}.{info_dict['ext']}"
-            title = info_dict.get('title', 'Unknown')  # Pobieranie tytułu utworu
-            return audio_filename, title
-    except Exception as e:
-        print(f"Error downloading audio: {e}")
-        return None, None
-
-
-# Funkcja do odtwarzania audio w kanale głosowym
-async def play_audio(ctx):
-    global is_playing
-    if not song_queue:
-        await ctx.send("___________________")
-        await ctx.send("Kolejka jest pusta!")
-        is_playing = False
-        return
-
-    # Ustawiamy is_playing na True, aby nie uruchamiać odtwarzania ponownie
-    is_playing = True
-
-    # Pobieramy informacje o pierwszej piosence z kolejki
-    url, title, download_path = song_queue.pop(0)
-
-    # Jeśli plik audio nie istnieje, spróbujemy go pobrać
-    if not os.path.exists(download_path):
-        download_path, title = download_audio(url)
-
-    if not download_path:
-        await ctx.send("Nie udało się pobrać pliku audio.")
-        return
-    await ctx.send("___________________________")
-    # Wyświetlanie aktualnie odtwarzanej piosenki
-    await ctx.send(f'Odtwarzam teraz: "{title}"')
-
-    # Wyświetlanie następnej piosenki, jeśli istnieje
-    if song_queue:
-        _, next_title, _ = song_queue[0]
-        await ctx.send(f'Następna piosenka: "{next_title}"')
-
-    voice_client = discord.utils.get(bot.voice_clients, guild=ctx.guild)
-
-    # Jeśli bot już jest połączony, nie łączymy się ponownie
-    if voice_client is None:
-        voice_channel = ctx.author.voice.channel
-        voice_client = await voice_channel.connect()
-
-    # Odtwarzamy audio w jego oryginalnym formacie
-    voice_client.play(
-        discord.FFmpegPCMAudio(download_path),
-        after=lambda e: asyncio.run_coroutine_threadsafe(on_audio_end(ctx, download_path), bot.loop)
-    )
-
-
-# Funkcja do obsługi końca piosenki i przejścia do następnej w kolejce
-async def on_audio_end(ctx, download_path):
-    global is_playing
-    # Usuwamy plik audio po zakończeniu odtwarzania
-    if os.path.exists(download_path):
-        os.remove(download_path)
-        print(f"Plik {download_path} został usunięty.")
-
-    if song_queue:
-        await play_audio(ctx)  # Odtwarzamy następną piosenkę
-    else:
-        is_playing = False
-        # Rozłączamy bota z kanału głosowego
-        voice_client = discord.utils.get(bot.voice_clients, guild=ctx.guild)
-        if voice_client:
-            await voice_client.disconnect()
-
-
-# Komenda do dodania piosenki do kolejki i odtwarzania
-@bot.command(
-    name='play')  # =========================================================================== Zamień nazwę ustawienia komendy
-async def play(ctx, url):
-    global is_playing
-
-    # Pobieramy audio i tytuł
-    download_path, title = download_audio(url)
-    if download_path is None:
-        await ctx.send("Nie udało się pobrać audio.")
-        return
-
-    # Dodajemy URL, tytuł i ścieżkę pobrania do kolejki
-    song_queue.append((url, title, download_path))
-    await ctx.send("______________________________________________")
-    await ctx.send(f'Piosenka "{title}" została dodana do kolejki.')
-
-    # Jeśli to pierwsza piosenka, zaczynamy odtwarzanie
-    if not is_playing:
-        await play_audio(ctx)
-
-
-# Komenda do dodawania piosenki do kolejki bez odtwarzania
-@bot.command(
-    name='add')  # =========================================================================== Zamień nazwę ustawienia komendy
-async def add(ctx, url):
-    download_path, title = download_audio(url)
-    if download_path is None:
-        await ctx.send("Nie udało się pobrać audio.")
-        return
-
-    song_queue.append((url, title, download_path))
-    await ctx.send(f'Piosenka "{title}" została dodana do kolejki.')
-
-
-# Komenda do pominięcia bieżącej piosenki
-@bot.command(
-    name='skip')  # =========================================================================== Zamień nazwę ustawienia komendy
-async def skip(ctx):
-    voice_client = discord.utils.get(bot.voice_clients, guild=ctx.guild)
-    if voice_client and voice_client.is_playing():
-        await ctx.send("Pomijam bieżącą piosenkę...")
-        voice_client.stop()  # Przejście do następnej piosenki uruchomi się w on_audio_end
-
-
-# Komenda do zatrzymywania muzyki i wyczyszczenia kolejki
-@bot.command(
-    name='stop')  # =========================================================================== Zamień nazwę ustawienia komendy
-async def stop(ctx):
-    global song_queue, is_playing
-
-    # Pobieramy voice_client i zatrzymujemy odtwarzanie
-    voice_client = discord.utils.get(bot.voice_clients, guild=ctx.guild)
-    if voice_client and voice_client.is_playing():
-        voice_client.stop()  # Zatrzymanie aktualnie odtwarzanej piosenki
-
-    # Odłączenie bota od kanału głosowego
-    if voice_client:
-        await voice_client.disconnect()
-        await ctx.send("Zatrzymano muzykę i rozłączono z kanałem.")
-
-    # Usunięcie wszystkich plików audio w kolejce
-    for file_path, _ in song_queue:
-        if os.path.exists(file_path):
-            os.remove(file_path)
-            print(f"Plik {file_path} został usunięty.")
-
-    # Wyczyszczenie kolejki i zresetowanie flagi odtwarzania
-    song_queue.clear()
-    is_playing = False
-
-
-# Komenda do pokazania kolejki
-@bot.command(
-    name='queue')  # =========================================================================== Zamień nazwę ustawienia komendy
-async def queue(ctx):
-    if not song_queue:
-        await ctx.send("Kolejka jest pusta!")
-        return
-
-    queue_str = "Aktualna kolejka utworów:\n"
-    for idx, (_, title, _) in enumerate(song_queue, 1):
-        queue_str += f"{idx}. {title}\n"
-
-    await ctx.send(queue_str)
-
-
-# Komenda do włączenia bota
-@bot.event
-async def on_ready():
-    print(f'Bot {bot.user} jest gotowy do działania!')
-
-
 # Funkcja do gry 777 (losowy wynik)
 def play_777(bet_amount):
     # Możliwe symbole w grze 777
@@ -249,11 +217,9 @@ def play_777(bet_amount):
     else:
         # Przegrana (brak takich samych symboli)
         return result, False
-
-
+        
 # Komenda do rozpoczęcia gry 777
-@bot.command(
-    name='777')  # =========================================================================== Zamień nazwę ustawienia komendy
+@bot.command( name='777')  # =========================================================================== Zamień nazwę ustawienia komendy
 async def play(ctx, bet: int):
     # Sprawdzamy, czy użytkownik podał odpowiednią kwotę
     if bet <= 0:
