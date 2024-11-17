@@ -178,6 +178,50 @@ async def playlist(ctx, playlist_name=None):
     if not is_playing:
         await play_audio(ctx)
 
+@bot.command(name="HELP")
+async def help_command(ctx):
+    help_message = """
+**Lista dostępnych komend:**
+
+1. **!play <URL>** - Dodaje utwór z podanym URL (YouTube) do kolejki i zaczyna odtwarzanie.
+2. **!skip** - Pomija aktualnie odtwarzany utwór.
+3. **!stop** - Zatrzymuje odtwarzanie muzyki, czyści kolejkę i rozłącza bota z kanału.
+4. **!addplaylist <nazwa_playlisty> <URL>** - Tworzy playlistę z podaną nazwą (jeśli nie istnieje) i dodaje do niej utwór z YouTube.
+5. **!playlist [nazwa_playlisty]** - Odtwarza playlistę o podanej nazwie lub wyświetla listę dostępnych playlist, jeśli nazwa nie jest podana.
+6. **!HELP** - Wyświetla tę listę komend.
+7. **!join** - Dołącza do ciebie na serwer.
+6. **!leave** - Wychodzi z kanału.
+6. **!clear** - czyści download.
+
+
+Jeśli potrzebujesz dodatkowej pomocy, możesz skontaktować się z administratorem bota ninja1708a#1053.
+    """
+    try:
+        await ctx.author.send(help_message)
+        await ctx.send("Lista komend została wysłana na Twoją prywatną wiadomość!")
+    except discord.Forbidden:
+        await ctx.send("Nie mogę wysłać wiadomości prywatnej. Upewnij się, że masz włączone DM od członków serwera.")
+
+@bot.command(name="clear")
+async def clear_downloads(ctx):
+    """Czyści folder 'downloads'."""
+    downloads_folder = "downloads"
+    if os.path.exists(downloads_folder) and os.path.isdir(downloads_folder):
+        deleted_files = []
+        for filename in os.listdir(downloads_folder):
+            file_path = os.path.join(downloads_folder, filename)
+            try:
+                os.remove(file_path)
+                deleted_files.append(filename)
+            except Exception as e:
+                await ctx.send(f"Nie udało się usunąć pliku: {filename}. Błąd: {e}")
+        
+        if deleted_files:
+            await ctx.send(f"Folder 'downloads' został wyczyszczony. Usunięto pliki: {', '.join(deleted_files)}.")
+        else:
+            await ctx.send("Folder 'downloads' jest już pusty.")
+    else:
+        await ctx.send("Folder 'downloads' nie istnieje lub jest już pusty.")
 
 @bot.event
 async def on_ready():
